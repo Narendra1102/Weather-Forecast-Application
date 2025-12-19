@@ -15,8 +15,8 @@ let wind = document.getElementById("wind")
 let humidity = document.getElementById("humidity")
 let weatherIcon = document.getElementById("weather-icon")
 let weatherCondition = document.getElementById("weather-condition")
-const forecastBox = document.getElementById("extended-forecast");
-
+const extendedForecast = document.getElementById("extended-forecast");
+const forecastContainer=document.getElementById("forecast-container")
 
 
 searchbtn.addEventListener("click", () => {
@@ -87,9 +87,41 @@ function displayCurrentWeather(data,city) {
     
 }
 
-function displayExtendedForecast(forecastData){
+
+
+function displayExtendedForecast(data){
+    forecastContainer.innerHTML=''
+
+    const dailyForecasts={}
+    data.list.forEach(item=>{
+        const date=item.dt_txt.split(" ")[0]
+        
+        if(!dailyForecasts[date]){
+            dailyForecasts[date]=[]
+        }
+        dailyForecasts[date].push(item)
+    })
+    
+    
+    
+    // Objects.keys(dailyForecasts).slice(0,5).forEach(item=>{
+
+    // })
+    
+ 
+    Object.keys(dailyForecasts).slice(1,6).forEach(date=>{
+        
+        const dayData=dailyForecasts[date][0]
+        
+        const card=createForecastCard(date,dayData)
+        forecastContainer.appendChild(card)
+
+    })
+    
 
 }
+
+
 
 function getWeatherIcon(condition,isNight) {
     const icons = {
@@ -110,4 +142,28 @@ function formatDateYYYYMMDD(date) {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+}
+
+
+function createForecastCard(date,dayData){
+
+    console.log(dayData);
+    
+    const card=document.createElement("div")
+    card.className="flex flex-col gap-2  bg-gray-500 p-4 border rounded-md"
+    
+    
+    
+    card.innerHTML=`
+        <h3 class="text-xl">${date}</h3>
+        <i class="fas ${getWeatherIcon(dayData.weather[0].main)} text-xl mx-auto"></i>
+        <p>Temp: ${Math.round(dayData.main.temp)}°C</p>
+        <p>Humidity: ${dayData.main.humidity} %</p>
+        <p>Wind: ${dayData.wind.speed} m/s</p>
+    `;
+
+        
+        
+    return card
+
 }
