@@ -44,6 +44,7 @@ searchInput.addEventListener('keydown', (e) => {
 
 unitToggle.addEventListener("click",toggleTemperatureUnit)
 
+currentlocation.addEventListener("click",getWeatherByLocation)
 
 async function getWeatherByCity(city) {
     try {
@@ -79,6 +80,25 @@ async function getWeatherData(lat, lon, city = ''){
     displayExtendedForecast(forecastData);
     
     
+}
+
+
+async function getWeatherByLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+                
+                await getWeatherData(latitude, longitude);
+            } catch (error) {
+                // showError('Failed to fetch weather data for your location.');
+            }
+        }, () => {
+            // showError('Unable to retrieve your location. Please allow location access.');
+        });
+    } else {
+        // showError('Geolocation is not supported by this browser.');
+    }
 }
 
 
