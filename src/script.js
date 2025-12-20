@@ -3,11 +3,13 @@ const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0';
 
 
-let cityInput = document.querySelector(".input-box")
+const searchInput = document.getElementById("searchInput");
+const suggestionsBox = document.getElementById("suggestions");
 let searchbtn = document.querySelector(".search-btn")
 let currentlocation = document.querySelector(".currentloc")
 let displayWeather = document.getElementById("display-section")
-
+let recentCitiesSelect=document.getElementById("recent-cities")
+let recentCitiesContainer=document.getElementById("recent-cities-container")
 
 let cityName = document.getElementById("city-name")
 let temp = document.getElementById("temp")
@@ -18,12 +20,14 @@ let weatherCondition = document.getElementById("weather-condition")
 const extendedForecast = document.getElementById("extended-forecast");
 const forecastContainer=document.getElementById("forecast-container")
 
+let recentCities=JSON.parse(localStorage.getItem("recentCities"))||[]
+
 
 searchbtn.addEventListener("click", () => {
-    const city = cityInput.value.trim();
+    const city = searchInput.value.trim();
     if (city) {
         getWeatherByCity(city);
-        // addToRecentCities(city);
+        saveSearch(city)
     } else {
         // showError('Please enter a city name.');
     }
@@ -84,7 +88,7 @@ function displayCurrentWeather(data,city) {
     weatherCondition.innerHTML = data.weather[0].description
 
     
-    
+    searchInput.value=""
 }
 
 
@@ -102,11 +106,6 @@ function displayExtendedForecast(data){
         dailyForecasts[date].push(item)
     })
     
-    
-    
-    // Objects.keys(dailyForecasts).slice(0,5).forEach(item=>{
-
-    // })
     
  
     Object.keys(dailyForecasts).slice(1,6).forEach(date=>{
@@ -167,3 +166,79 @@ function createForecastCard(date,dayData){
     return card
 
 }
+
+
+/* -------- SHOW RECENT SEARCHES ON CLICK -------- */
+searchInput.addEventListener("focus", () => {
+    showRecentSearches();
+});
+
+/* -------- FILTER WHILE TYPING -------- */
+searchInput.addEventListener("input", () => {
+    const value = searchInput.value.toLowerCase();
+    suggestionsBox.innerHTML = "";
+
+    if (!value) {
+        showRecentSearches();
+        return;
+    }
+
+    const matches = recentCities
+        .filter(city => city.toLowerCase().includes(value))
+        .slice(0, 5);
+
+    renderSuggestions(matches);
+});
+
+/* -------- CLICK OUTSIDE TO CLOSE -------- */
+document.addEventListener("mousedown", (e) => {
+    if (!e.target.closest(".search-container")) {
+        suggestionsBox.style.display = "none";
+    }
+});
+
+/* -------- FUNCTIONS -------- */
+
+function showRecentSearches() {
+    suggestionsBox.innerHTML = "";
+
+    const lastFive = recentCities.slice(0, 5);
+    renderSuggestions(lastFive);
+}
+
+function renderSuggestions(list) {
+    if (list.length === 0) {
+        suggestionsBox.style.display = "none";
+        return;
+    }
+
+    list.forEach(city => {
+        const li = document.createElement("li");
+        li.className="p-2.5 hover:bg-gray-200"
+        li.textContent = city;
+
+        //To interactive with li elements
+        li.addEventListener("mousedown", (e) => {
+            e.preventDefault()
+            searchInput.value = city;
+            suggestionsBox.style.display = "none";
+
+            // Call your weather function here
+            getWeatherByCity(city);
+        });
+
+        suggestionsBox.appendChild(li);
+    });
+
+    suggestionsBox.style.display = "block";
+}
+
+/* -------- SAVE SEARCH -------- */
+function saveSearch(city) {
+    if (!recentCities.includes(city)) {
+        recentCities.unshift(city);
+        if (recentCities.length > 5) recentCities.pop();
+        localStorage.setItem("recentCities", JSON.stringify(recentCities));
+    }
+}
+
