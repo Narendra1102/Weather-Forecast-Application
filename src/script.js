@@ -10,6 +10,7 @@ let currentlocation = document.querySelector(".currentloc")
 let displayWeather = document.getElementById("display-section")
 let recentCitiesSelect=document.getElementById("recent-cities")
 let recentCitiesContainer=document.getElementById("recent-cities-container")
+let unitToggle=document.getElementById("unit-toggle")
 
 let cityName = document.getElementById("city-name")
 let temp = document.getElementById("temp")
@@ -22,6 +23,7 @@ const forecastContainer=document.getElementById("forecast-container")
 
 let recentCities=JSON.parse(localStorage.getItem("recentCities"))||[]
 
+let isCelsius = true;
 
 searchbtn.addEventListener("click", () => {
     const city = searchInput.value.trim();
@@ -33,6 +35,14 @@ searchbtn.addEventListener("click", () => {
     }
 })
 
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        searchbtn.click();
+    }
+});
+
+
+unitToggle.addEventListener("click",toggleTemperatureUnit)
 
 
 async function getWeatherByCity(city) {
@@ -67,7 +77,7 @@ async function getWeatherData(lat, lon, city = ''){
     
     displayCurrentWeather(currentData, city);
     displayExtendedForecast(forecastData);
-
+    
     
 }
 
@@ -77,7 +87,9 @@ function displayCurrentWeather(data,city) {
 
     cityName.innerHTML = data.name+` (${formatDateYYYYMMDD(new Date(data.dt*1000))})`
 
-    temp.innerHTML = Math.round(data.main.temp)
+    temp.innerHTML = `${Math.round(data.main.temp)}°`
+    unitToggle.textContent = 'C';
+    isCelsius = true;
     wind.innerHTML = data.wind.speed
     humidity.innerHTML = data.main.humidity
 
@@ -88,7 +100,7 @@ function displayCurrentWeather(data,city) {
     weatherCondition.innerHTML = data.weather[0].description
 
     
-    searchInput.value=""
+    
 }
 
 
@@ -145,20 +157,18 @@ function formatDateYYYYMMDD(date) {
 
 
 function createForecastCard(date,dayData){
-
-    console.log(dayData);
     
     const card=document.createElement("div")
-    card.className="flex flex-col gap-2  bg-gray-500 p-4 border rounded-md"
+    card.className="flex flex-col gap-2  bg-gray-500 p-4 border rounded-md items-center"
     
     
     
     card.innerHTML=`
         <h3 class="text-xl">${date}</h3>
         <i class="fas ${getWeatherIcon(dayData.weather[0].main)} text-xl mx-auto"></i>
-        <p>Temp: ${Math.round(dayData.main.temp)}°C</p>
-        <p>Humidity: ${dayData.main.humidity} %</p>
-        <p>Wind: ${dayData.wind.speed} m/s</p>
+        <p> ${Math.round(dayData.main.temp)}°C</p>
+        <p> ${dayData.main.humidity} %</p>
+        <p> ${dayData.wind.speed} m/s</p>
     `;
 
         
@@ -242,3 +252,18 @@ function saveSearch(city) {
     }
 }
 
+
+function toggleTemperatureUnit(){
+    const currentTemp = parseInt(temp.textContent);
+    if(isCelsius){
+        const fahrenheit = Math.round((currentTemp*9/5)+32)
+        temp.textContent=`${fahrenheit}°`
+        unitToggle.textContent = 'F';
+    }
+    else{
+        const celsius = Math.round((currentTemp-32)*5/9)
+        temp.textContent=`${celsius}°`
+        unitToggle.textContent = 'C';
+    }
+    isCelsius=!isCelsius
+}
