@@ -86,7 +86,9 @@ async function getWeatherData(lat, lon, city = '') {
 
     displayCurrentWeather(currentData, city);
     displayExtendedForecast(forecastData);
+    console.log(currentData);
 
+    updateBackground(currentData,currentData.weather[0].main);
 
 }
 
@@ -180,6 +182,23 @@ function getWeatherIcon(condition, isNight) {
     return icons[condition] || 'fa-sun';
 }
 
+function updateBackground(data,condition) {
+    const body = document.body;
+    body.classList.add('min-h-screen', 'font-sans');
+
+    if (condition === 'Rain') {
+        body.style.backgroundColor = "#9ca3af"; 
+    } else if (condition === 'Clear') {
+        body.style.backgroundColor = "#3b82f6"; 
+    } else if (condition === 'Clouds') {
+        body.style.backgroundColor = '#d1d5db'; 
+    } else {
+        body.style.backgroundColor = '#bfdbfe'; 
+    }
+
+    
+}
+
 function formatDateYYYYMMDD(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -193,8 +212,6 @@ function createForecastCard(date, dayData) {
     const card = document.createElement("div")
     card.className = "flex flex-col gap-2  bg-gray-500 p-4 border rounded-md items-center"
 
-
-
     card.innerHTML = `
         <h3 class="text-xl">${date}</h3>
         <i class="fas ${getWeatherIcon(dayData.weather[0].main)} text-xl mx-auto"></i>
@@ -202,8 +219,6 @@ function createForecastCard(date, dayData) {
         <p> ${dayData.main.humidity} %</p>
         <p> ${dayData.wind.speed} m/s</p>
     `;
-
-
 
     return card
 
@@ -270,9 +285,11 @@ function renderSuggestions(list) {
         });
 
         suggestionsBox.appendChild(li);
+
     });
 
     suggestionsBox.style.display = "block";
+
 }
 
 /* -------- SAVE SEARCH -------- */
