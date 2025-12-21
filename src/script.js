@@ -86,7 +86,6 @@ async function getWeatherData(lat, lon, city = '') {
 
     displayCurrentWeather(currentData, city);
     displayExtendedForecast(forecastData);
-    console.log(currentData);
 
     updateBackground(currentData,currentData.weather[0].main);
 
@@ -186,10 +185,10 @@ function updateBackground(data,condition) {
     const body = document.body;
     body.classList.add('min-h-screen', 'font-sans');
 
-    if (condition === 'Rain') {
+    if (condition === 'Rain' || condition==='Thunderstorm') {
         body.style.backgroundColor = "#9ca3af"; 
     } else if (condition === 'Clear') {
-        body.style.backgroundColor = "#3b82f6"; 
+        body.style.backgroundColor = "#93c5fd"; 
     } else if (condition === 'Clouds') {
         body.style.backgroundColor = '#d1d5db'; 
     } else {
@@ -210,7 +209,7 @@ function formatDateYYYYMMDD(date) {
 function createForecastCard(date, dayData) {
 
     const card = document.createElement("div")
-    card.className = "flex flex-col gap-2  bg-gray-500 p-4 border rounded-md items-center"
+    card.className = "flex flex-col gap-2  bg-gray-500 p-5 border rounded-md items-center"
 
     card.innerHTML = `
         <h3 class="text-xl">${date}</h3>

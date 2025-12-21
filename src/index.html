@@ -4,61 +4,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Weather Forecast App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+        integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="./output.css" rel="stylesheet">
 </head>
 
 <body class="bg-sky-100">
     <h1 class="text-[32px] bg-blue-600 p-3 text-center text-white font-bold">Weather Dashboard</h1>
-    <main class="flex m-6.25 gap-6">
-        <section class="w-[30%]">
-            <div>
+    <main class="lg:flex m-5 gap-6">
+
+        <section class="lg:w-[30%] w-[60%] mx-auto ">
+            <div class=" flex flex-col w-full">
 
                 <h3 class="text-[24px] font-semibold mb-2.5 tracking-tight">Enter a City Name</h3>
 
-                <div class="flex flex-col w-full">
-                    <input type="text" placeholder="E.g.NewYork, London, Tokyo"
-                        class="border  p-2 bg-white border-gray-100 focus:outline-none">
+                <div class="flex flex-col">
+                    <div id="search-container">
+                        <input type="text" id="searchInput" placeholder="Search city..." autocomplete="off"
+                            class="w-full  text-[16px] p-2.5 bg-white focus:outline-none" />
+                        <ul id="suggestions" class="relative w-full bg-white max-h-50 overflow-y-auto hidden"></ul>
+                    </div>
                     <p class="error-message text-red-500 text-[18px] font-medium"></p>
-                    <button class="bg-blue-600 p-2 text-center text-white mt-4.5">Search</button>
+                    <button
+                        class="search-btn bg-blue-600 p-2 text-center text-white mt-4.5 cursor-pointer">Search</button>
                     <div class="flex items-center my-2.5">
                         <hr class="grow border-gray-400">
                         <span class="px-4 text-sm font-semibold text-gray-600">OR</span>
                         <hr class="grow border-gray-400">
                     </div>
-                    <button class="text-white font-medium border bg-gray-500 text-center p-2 ">Current
+                    <button
+                        class="currentloc text-white font-medium border bg-gray-500 text-center p-2 cursor-pointer">Use
+                        Current
                         Location</button>
+
                 </div>
 
+                <div id="error-message" class="bg-red-500 mt-5 px-2  py-3 text-white hidden">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="error-text"></span>
+                </div>
+
+                <div id="alert-message" class="bg-red-500 mt-5 px-2  py-3 text-white hidden">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="alert-text"></span>
+                </div>
             </div>
+
+
+
+            
         </section>
 
-        <section class="w-[70%] text-white">
-            <div class="flex bg-blue-500  h-50 justify-between p-3">
-                <div class="flex flex-col p-5">
-                    <h2 class="text-3xl mb-2 font-semibold">London</h2>
-                    <div class="flex flex-col gap-1">
-                        <h5>Temperature</h5>
-                        <h5>Wind</h5>
-                        <h5>Humidity</h5>
+        <section id="display-section" class="lg:w-[70%] text-white hidden lg:mt-0 mt-[80px]">
+
+            <div class="bg-blue-500  border rounded-md h-50 p-4 relative">
+                <div class="flex flex-col">
+                    <h2 id="city-name" class="text-3xl mb-2 font-semibold"></h2>
+                    <div class="flex flex-col gap-2">
+                        <div>
+                            <span id="temp" class="text-lg"></span>
+                            <button id="unit-toggle"></button>
+                        </div>
+                        
+                        <h3>Wind: <span id="wind"></span> m/s</h3>    
+                            
+                        <h3>Humidity: <span id="humidity"></span> %</h3>   
+
                     </div>
 
                 </div>
 
-                <div class="flex flex-col justify-center">
-                    Light Rain
+
+
+                <div class="flex flex-col items-center justify-center gap-2 absolute top-7 right-20">
+                    <i id="weather-icon"></i>
+
+                    <p id="weather-condition" class="text-lg capitalize text-center"></p>
+
                 </div>
+
+
+
             </div>
 
-            <h2 class="text-black text-2xl font-bold mt-4">5-Day Forecast</h2>
 
-            <div class="extended-forecast">
 
-                <div class=""></div>
-                <div class=""></div>
-                <div class=""></div>
-                <div class=""></div>
-                <div class=""></div>
+            <div id="extended-forecast" class="mt-10">
+                <h2 class="text-black text-2xl font-bold">5-Day Forecast</h2>
+                <div id="forecast-container" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm: gap-2 md:gap-5 mt-4">
+
+                </div>
+
             </div>
 
         </section>
