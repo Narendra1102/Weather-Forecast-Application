@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+
+.forecast-card{
+    @apply border w-45 h-50 bg-gray-500 rounded-md;
+}
+
+
