@@ -8,13 +8,13 @@ const suggestionsBox = document.getElementById("suggestions");
 let searchbtn = document.querySelector(".search-btn")
 let currentlocation = document.querySelector(".currentloc")
 let displayWeather = document.getElementById("display-section")
-let recentCitiesSelect=document.getElementById("recent-cities")
-let recentCitiesContainer=document.getElementById("recent-cities-container")
-let unitToggle=document.getElementById("unit-toggle")
-let errorMessage=document.getElementById("error-message")
-let errorText=document.getElementById("error-text")
-let alertMessage=document.getElementById("alert-message")
-let alertText=document.getElementById("alert-text")
+let recentCitiesSelect = document.getElementById("recent-cities")
+let recentCitiesContainer = document.getElementById("recent-cities-container")
+let unitToggle = document.getElementById("unit-toggle")
+let errorMessage = document.getElementById("error-message")
+let errorText = document.getElementById("error-text")
+let alertMessage = document.getElementById("alert-message")
+let alertText = document.getElementById("alert-text")
 
 let cityName = document.getElementById("city-name")
 let temp = document.getElementById("temp")
@@ -23,9 +23,9 @@ let humidity = document.getElementById("humidity")
 let weatherIcon = document.getElementById("weather-icon")
 let weatherCondition = document.getElementById("weather-condition")
 const extendedForecast = document.getElementById("extended-forecast");
-const forecastContainer=document.getElementById("forecast-container")
+const forecastContainer = document.getElementById("forecast-container")
 
-let recentCities=JSON.parse(localStorage.getItem("recentCities"))||[]
+let recentCities = JSON.parse(localStorage.getItem("recentCities")) || []
 
 let isCelsius = true;
 
@@ -46,44 +46,48 @@ searchInput.addEventListener('keydown', (e) => {
 });
 
 
-unitToggle.addEventListener("click",toggleTemperatureUnit)
+unitToggle.addEventListener("click", toggleTemperatureUnit)
 
-currentlocation.addEventListener("click",getWeatherByLocation)
+currentlocation.addEventListener("click", getWeatherByLocation)
 
 async function getWeatherByCity(city) {
     try {
         const geoResponse = await fetch(`${GEO_URL}/direct?q=${city}&limit=1&appid=${API_KEY}`);
         const geoData = await geoResponse.json();
-        
-        if (geoData.length==0) {
+
+        if (geoData.length == 0) {
             throw new Error('City not found');
         }
         const { lat, lon, name } = geoData[0];
-        
-        await getWeatherData(lat,lon,name)
+
+        await getWeatherData(lat, lon, name)
 
     }
 
     catch (err) {
-        // showError('Failed to fetch weather data. Please check the city name and try again.');
+        showError('Failed to fetch weather data. Please check the city name and try again.');
     }
 }
 
 
 
-async function getWeatherData(lat, lon, city = ''){
+async function getWeatherData(lat, lon, city = '') {
+
 
     const currentResponse = await fetch(`${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
     const currentData = await currentResponse.json();
-    
-    
+
+
     const forecastResponse = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
     const forecastData = await forecastResponse.json();
-    
+
+
+
+
     displayCurrentWeather(currentData, city);
     displayExtendedForecast(forecastData);
-    
-    
+
+
 }
 
 
@@ -92,80 +96,79 @@ async function getWeatherByLocation() {
         navigator.geolocation.getCurrentPosition(async (position) => {
             const { latitude, longitude } = position.coords;
             try {
-                
+
                 await getWeatherData(latitude, longitude);
             } catch (error) {
-                // showError('Failed to fetch weather data for your location.');
+                showError('Failed to fetch weather data for your location.');
             }
         }, () => {
-            // showError('Unable to retrieve your location. Please allow location access.');
+            showError('Unable to retrieve your location. Please allow location access.');
         });
     } else {
-        // showError('Geolocation is not supported by this browser.');
+        showError('Geolocation is not supported by this browser.');
     }
 }
 
 
-function displayCurrentWeather(data,city) {
+function displayCurrentWeather(data, city) {
     displayWeather.classList.remove("hidden")
 
-    cityName.innerHTML = data.name+` (${formatDateYYYYMMDD(new Date(data.dt*1000))})`
+    cityName.innerHTML = data.name + ` (${formatDateYYYYMMDD(new Date(data.dt * 1000))})`
 
-    const currTemp= Math.round(data.main.temp)
+    const currTemp = Math.round(data.main.temp)
     temp.innerHTML = `${currTemp}°`
     unitToggle.textContent = 'C';
     isCelsius = true;
     wind.innerHTML = data.wind.speed
     humidity.innerHTML = data.main.humidity
-    console.log(data);
-    
-    if(currTemp>40){
-        showAlert("Stay inside home.Stay safe")
+
+    if (currTemp > 40) {
+        showAlert("Temp is very high.Please stay inside home.Stay safe")
     }
 
     const iconCode = data.weather[0].icon;
     const isNight = iconCode.endsWith('n');
-    weatherIcon.className = `fas ${getWeatherIcon(data.weather[0].main,isNight)} text-6xl ${isNight}?'text-blue-200':'text-yellow-300'`;
-    
+    weatherIcon.className = `fas ${getWeatherIcon(data.weather[0].main, isNight)} text-6xl ${isNight}?'text-blue-200':'text-yellow-300'`;
+
     weatherCondition.innerHTML = data.weather[0].description
 
-    searchInput.value=""
+    searchInput.value = ""
 }
 
 
 
-function displayExtendedForecast(data){
-    forecastContainer.innerHTML=''
+function displayExtendedForecast(data) {
+    forecastContainer.innerHTML = ''
 
-    const dailyForecasts={}
-    data.list.forEach(item=>{
-        const date=item.dt_txt.split(" ")[0]
-        
-        if(!dailyForecasts[date]){
-            dailyForecasts[date]=[]
+    const dailyForecasts = {}
+    data.list.forEach(item => {
+        const date = item.dt_txt.split(" ")[0]
+
+        if (!dailyForecasts[date]) {
+            dailyForecasts[date] = []
         }
         dailyForecasts[date].push(item)
     })
-    
-    
- 
-    Object.keys(dailyForecasts).slice(1,6).forEach(date=>{
-        
-        const dayData=dailyForecasts[date][0]
-        
-        const card=createForecastCard(date,dayData)
+
+
+
+    Object.keys(dailyForecasts).slice(1, 6).forEach(date => {
+
+        const dayData = dailyForecasts[date][0]
+
+        const card = createForecastCard(date, dayData)
         forecastContainer.appendChild(card)
 
     })
-    
+
 
 }
 
 
 
-function getWeatherIcon(condition,isNight) {
+function getWeatherIcon(condition, isNight) {
     const icons = {
-        'Clear':  isNight ? 'fa-moon' :'fa-sun',
+        'Clear': isNight ? 'fa-moon' : 'fa-sun',
         'Clouds': isNight ? 'fa-cloud-moon' : 'fa-cloud-sun',
         'Rain': isNight ? 'fa-cloud-moon-rain' : 'fa-cloud-sun-rain',
         'Thunderstorm': 'fa-bolt',
@@ -185,14 +188,14 @@ function formatDateYYYYMMDD(date) {
 }
 
 
-function createForecastCard(date,dayData){
-    
-    const card=document.createElement("div")
-    card.className="flex flex-col gap-2  bg-gray-500 p-4 border rounded-md items-center"
-    
-    
-    
-    card.innerHTML=`
+function createForecastCard(date, dayData) {
+
+    const card = document.createElement("div")
+    card.className = "flex flex-col gap-2  bg-gray-500 p-4 border rounded-md items-center"
+
+
+
+    card.innerHTML = `
         <h3 class="text-xl">${date}</h3>
         <i class="fas ${getWeatherIcon(dayData.weather[0].main)} text-xl mx-auto"></i>
         <p> ${Math.round(dayData.main.temp)}°C</p>
@@ -200,8 +203,8 @@ function createForecastCard(date,dayData){
         <p> ${dayData.wind.speed} m/s</p>
     `;
 
-        
-        
+
+
     return card
 
 }
@@ -253,7 +256,7 @@ function renderSuggestions(list) {
 
     list.forEach(city => {
         const li = document.createElement("li");
-        li.className="p-2.5 hover:bg-gray-200"
+        li.className = "p-2.5 hover:bg-gray-200"
         li.textContent = city;
 
         //To interactive with li elements
@@ -282,26 +285,29 @@ function saveSearch(city) {
 }
 
 
-function toggleTemperatureUnit(){
+function toggleTemperatureUnit() {
     const currentTemp = parseInt(temp.textContent);
-    if(isCelsius){
-        const fahrenheit = Math.round((currentTemp*9/5)+32)
-        temp.textContent=`${fahrenheit}°`
+    if (isCelsius) {
+        const fahrenheit = Math.round((currentTemp * 9 / 5) + 32)
+        temp.textContent = `${fahrenheit}°`
         unitToggle.textContent = 'F';
     }
-    else{
-        const celsius = Math.round((currentTemp-32)*5/9)
-        temp.textContent=`${celsius}°`
+    else {
+        const celsius = Math.round((currentTemp - 32) * 5 / 9)
+        temp.textContent = `${celsius}°`
         unitToggle.textContent = 'C';
     }
-    isCelsius=!isCelsius
+    isCelsius = !isCelsius
 }
 
 
+function showError(message) {
+    errorMessage.classList.remove("hidden")
+    errorText.textContent = message
+}
 
-
-function showAlert(message){
+function showAlert(message) {
     alertMessage.classList.remove("hidden")
-    alertText.textContent=message
+    alertText.textContent = message
 }
 
