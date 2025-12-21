@@ -11,6 +11,10 @@ let displayWeather = document.getElementById("display-section")
 let recentCitiesSelect=document.getElementById("recent-cities")
 let recentCitiesContainer=document.getElementById("recent-cities-container")
 let unitToggle=document.getElementById("unit-toggle")
+let errorMessage=document.getElementById("error-message")
+let errorText=document.getElementById("error-text")
+let alertMessage=document.getElementById("alert-message")
+let alertText=document.getElementById("alert-text")
 
 let cityName = document.getElementById("city-name")
 let temp = document.getElementById("temp")
@@ -31,7 +35,7 @@ searchbtn.addEventListener("click", () => {
         getWeatherByCity(city);
         saveSearch(city)
     } else {
-        // showError('Please enter a city name.');
+        showError('Please enter a city name.');
     }
 })
 
@@ -107,11 +111,17 @@ function displayCurrentWeather(data,city) {
 
     cityName.innerHTML = data.name+` (${formatDateYYYYMMDD(new Date(data.dt*1000))})`
 
-    temp.innerHTML = `${Math.round(data.main.temp)}°`
+    const currTemp= Math.round(data.main.temp)
+    temp.innerHTML = `${currTemp}°`
     unitToggle.textContent = 'C';
     isCelsius = true;
     wind.innerHTML = data.wind.speed
     humidity.innerHTML = data.main.humidity
+    console.log(data);
+    
+    if(currTemp>40){
+        showAlert("Stay inside home.Stay safe")
+    }
 
     const iconCode = data.weather[0].icon;
     const isNight = iconCode.endsWith('n');
@@ -119,8 +129,7 @@ function displayCurrentWeather(data,city) {
     
     weatherCondition.innerHTML = data.weather[0].description
 
-    
-    
+    searchInput.value=""
 }
 
 
@@ -287,3 +296,12 @@ function toggleTemperatureUnit(){
     }
     isCelsius=!isCelsius
 }
+
+
+
+
+function showAlert(message){
+    alertMessage.classList.remove("hidden")
+    alertText.textContent=message
+}
+
