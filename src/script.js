@@ -81,13 +81,10 @@ async function getWeatherData(lat, lon, city = '') {
     const forecastResponse = await fetch(`${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`);
     const forecastData = await forecastResponse.json();
 
-
-
-
     displayCurrentWeather(currentData, city);
     displayExtendedForecast(forecastData);
 
-    updateBackground(currentData,currentData.weather[0].main);
+    updateCurrentWeatherBackground(currentData.weather[0].main);
 
 }
 
@@ -113,18 +110,23 @@ async function getWeatherByLocation() {
 
 function displayCurrentWeather(data, city) {
     displayWeather.classList.remove("hidden")
+    hideError()
 
     cityName.innerHTML = data.name + ` (${formatDateYYYYMMDD(new Date(data.dt * 1000))})`
 
     const currTemp = Math.round(data.main.temp)
-    temp.innerHTML = `${currTemp}°`
+    temp.innerHTML = `🌡️ ${currTemp}°`
     unitToggle.textContent = 'C';
     isCelsius = true;
     wind.innerHTML = data.wind.speed
     humidity.innerHTML = data.main.humidity
 
+
     if (currTemp > 40) {
         showAlert("Temp is very high.Please stay inside home.Stay safe")
+    }
+    else {
+        hideAlert();
     }
 
     const iconCode = data.weather[0].icon;
@@ -141,10 +143,10 @@ function displayCurrentWeather(data, city) {
 function displayExtendedForecast(data) {
     forecastContainer.innerHTML = ''
 
+    //pushing unique dates into object of arrays
     const dailyForecasts = {}
     data.list.forEach(item => {
         const date = item.dt_txt.split(" ")[0]
-
         if (!dailyForecasts[date]) {
             dailyForecasts[date] = []
         }
@@ -152,7 +154,7 @@ function displayExtendedForecast(data) {
     })
 
 
-
+    //Taking next 5 days forecast
     Object.keys(dailyForecasts).slice(1, 6).forEach(date => {
 
         const dayData = dailyForecasts[date][0]
@@ -181,23 +183,31 @@ function getWeatherIcon(condition, isNight) {
     return icons[condition] || 'fa-sun';
 }
 
-function updateBackground(data,condition) {
-    const body = document.body;
-    body.classList.add('min-h-screen', 'font-sans');
 
-    if (condition === 'Rain' || condition==='Thunderstorm') {
-        body.style.backgroundColor = "#9ca3af"; 
-    } else if (condition === 'Clear') {
-        body.style.backgroundColor = "#93c5fd"; 
-    } else if (condition === 'Clouds') {
-        body.style.backgroundColor = '#d1d5db'; 
-    } else {
-        body.style.backgroundColor = '#bfdbfe'; 
+function updateCurrentWeatherBackground(condition) {
+
+    const card = document.getElementById("current-weather-card");
+    if (!card) return;
+
+    let imageUrl = "";
+
+    if(condition=="Clear"){
+        imageUrl = "./images/sunny.jpg";
     }
-
-    
+    if(condition=="Clouds"){
+        imageUrl = "./images/cloudy.jpg";
+    }
+    if(condition=="Rain"){
+        imageUrl = "./images/rainy.jpg";
+    }       
+    card.style.backgroundImage = `url(${imageUrl})`;
 }
 
+    
+
+
+
+//Format date(YYYY-MM-DD)
 function formatDateYYYYMMDD(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -293,8 +303,10 @@ function renderSuggestions(list) {
 
 /* -------- SAVE SEARCH -------- */
 function saveSearch(city) {
+    //if city is not in recent cities,add it
     if (!recentCities.includes(city)) {
         recentCities.unshift(city);
+        //recent cities is greater than 5,remove the old one->we are only keeping 5 recent cities 
         if (recentCities.length > 5) recentCities.pop();
         localStorage.setItem("recentCities", JSON.stringify(recentCities));
     }
@@ -303,11 +315,13 @@ function saveSearch(city) {
 
 function toggleTemperatureUnit() {
     const currentTemp = parseInt(temp.textContent);
+    //convert celsius to fahrenheit
     if (isCelsius) {
         const fahrenheit = Math.round((currentTemp * 9 / 5) + 32)
         temp.textContent = `${fahrenheit}°`
         unitToggle.textContent = 'F';
     }
+    //convert fahrenheit to celsius
     else {
         const celsius = Math.round((currentTemp - 32) * 5 / 9)
         temp.textContent = `${celsius}°`
@@ -327,3 +341,10 @@ function showAlert(message) {
     alertText.textContent = message
 }
 
+function hideError(){
+    errorMessage.classList.add("hidden")
+}
+
+function hideAlert(){
+    alertMessage.classList.add("hidden")
+}
